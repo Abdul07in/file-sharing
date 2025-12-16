@@ -11,8 +11,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="./js/theme-init.js"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -25,7 +27,9 @@
                             500: '#6366f1',
                             600: '#4f46e5',
                             700: '#4338ca',
-                        }
+                        },
+                        // Ensure pure black is available
+                        black: '#000000',
                     }
                 }
             }
@@ -33,10 +37,12 @@
     </script>
 </head>
 
-<body class="h-full flex flex-col font-sans">
+<body
+    class="h-full flex flex-col font-sans bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100 transition-colors duration-200">
 
     <!-- Header -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav
+        class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
@@ -54,15 +60,30 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden sm:flex items-center space-x-4">
                     <a href="./"
-                        class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Send</a>
+                        class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Send</a>
                     <a href="./receive"
-                        class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Receive</a>
+                        class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Receive</a>
                     <a href="./share-text"
-                        class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Share
+                        class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Share
                         Text</a>
                     <a href="./view-text"
-                        class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">View
+                        class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">View
                         Text</a>
+
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle" type="button"
+                        class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
                 </div>
                 <!-- Mobile menu button -->
                 <div class="flex items-center sm:hidden">
@@ -98,23 +119,18 @@
                     class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800">Share
                     Text</a>
                 <a href="./view-text"
-                    class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800">View
+                    class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-800 dark:hover:text-white">View
                     Text</a>
+                <!-- Mobile Theme Toggle -->
+                <button id="mobile-theme-toggle"
+                    class="w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-800 dark:hover:text-white">
+                    Toggle Theme
+                </button>
             </div>
         </div>
     </nav>
 
-    <script>
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-        const svgs = btn.querySelectorAll('svg');
-
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-            svgs.forEach(svg => svg.classList.toggle('hidden'));
-            svgs.forEach(svg => svg.classList.toggle('block'));
-        });
-    </script>
+    <script src="./js/app.js"></script>
 
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
@@ -164,7 +180,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
+    <footer
+        class="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 mt-auto transition-colors duration-200">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-sm text-gray-500">&copy; <?= date('Y') ?> Secure Share. Enterprise Grade
                 Security.</p>
