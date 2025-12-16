@@ -1,19 +1,9 @@
-# Test Report
+# API Test Report
+Date: 2025-12-16 09:40:06
 
-Date: 2025-12-16 08:02:55
-
-| Status | Message |
-|---|---|
-| ✅ PASS | File Upload endpoint returns 200 OK and success status |
-| ✅ PASS | File Upload should return a PIN |
-| ✅ PASS | File Download endpoint returns 200 OK and success status |
-| ✅ PASS | Downloaded content must match original content exactly |
-| ✅ PASS | Downloaded filename must match original filename |
-| ✅ PASS | File should not be retrievable a second time |
-| ✅ PASS | Text Share endpoint returns 200 OK |
-| ✅ PASS | Text Share should return a PIN |
-| ✅ PASS | Text View endpoint returns 200 OK |
-| ✅ PASS | Retrieved text must match original text |
-| ✅ PASS | Text should not be retrievable a second time |
-
-**Summary**: 11 passed, 0 failed.
+| Test Case | Status | Details |
+|---|---|---|
+| Chunked Upload API | **PASS** | PIN: 9943 |
+| File Download API | **PASS** | Content matches strictly. |
+| Share Text API | **PASS** | PIN: 2758 |
+| View Text API | **PASS** | Content matches. |

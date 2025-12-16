@@ -1,9 +1,10 @@
-<div class="bg-white shadow sm:rounded-lg overflow-hidden max-w-2xl mx-auto">
-    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-100">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
+<div
+    class="bg-white dark:bg-black shadow sm:rounded-lg overflow-hidden max-w-2xl mx-auto border border-gray-100 dark:border-gray-800 transition-colors duration-200">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
             Secure Text View
         </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500" id="headerText">
+        <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" id="headerText">
             Enter the 4-digit PIN to view shared text.
         </p>
     </div>
@@ -28,10 +29,10 @@
         <!-- Input Form -->
         <form id="viewTextForm">
             <div>
-                <label for="pin" class="block text-sm font-medium text-gray-700">Content PIN</label>
+                <label for="pin" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content PIN</label>
                 <div class="mt-1">
                     <input type="text" name="pin" id="pin" maxlength="4" pattern="\d{4}"
-                        class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-lg border-gray-300 rounded-md text-center tracking-widest py-3"
+                        class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md text-center tracking-widest py-3"
                         placeholder="0000" required autocomplete="off">
                 </div>
             </div>
@@ -47,23 +48,23 @@
         <div id="resultContent" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                 <button type="button" onclick="copyText()"
-                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                     Copy Text
                 </button>
                 <button type="button" onclick="toggleMarkdown()"
-                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                     Preview Markdown
                 </button>
             </div>
 
             <!-- Raw Text View -->
             <div id="rawText"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50 p-4 font-mono text-sm overflow-auto"
+                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-900 dark:text-gray-100 p-4 font-mono text-sm overflow-auto"
                 style="max-height: 500px; white-space: pre-wrap;"></div>
 
             <!-- Markdown Preview (Hidden) -->
             <div id="markdownPreview"
-                class="hidden mt-1 w-full rounded-md border-gray-300 shadow-sm bg-white p-6 prose prose-indigo max-w-none">
+                class="hidden mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm bg-white dark:bg-black p-6 prose prose-indigo dark:prose-invert max-w-none">
             </div>
 
             <div class="rounded-md bg-yellow-50 p-4">
@@ -95,86 +96,4 @@
 
 <!-- Marked.js -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-    document.getElementById('viewTextForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const pin = document.getElementById('pin').value.trim();
-        if (!pin) return;
-
-        const btn = document.getElementById('viewBtn');
-        const errorArea = document.getElementById('errorArea');
-        const errorMessage = document.getElementById('errorMessage');
-
-        btn.disabled = true;
-        btn.innerHTML = 'Decrypting...';
-        errorArea.classList.add('hidden');
-
-        try {
-            const response = await fetch('./api/view-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ pin: pin })
-            });
-
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                // Success
-                const base64Data = result.data.content;
-                // remove info prefix if present (data:text/plain;base64,)
-                let rawBase64 = base64Data;
-                if (base64Data.includes(',')) {
-                    rawBase64 = base64Data.split(',')[1];
-                }
-
-                // Decode
-                try {
-                    const decodedText = decodeURIComponent(escape(atob(rawBase64)));
-
-                    // Display
-                    document.getElementById('viewTextForm').classList.add('hidden');
-                    document.getElementById('headerText').textContent = "Decrypted content below.";
-                    document.getElementById('resultContent').classList.remove('hidden');
-                    document.getElementById('rawText').textContent = decodedText;
-
-                } catch (decodeErr) {
-                    throw new Error("Failed to decode content.");
-                }
-
-            } else {
-                throw new Error(result.message || 'Retrieval failed');
-            }
-
-        } catch (err) {
-            errorArea.classList.remove('hidden');
-            errorMessage.textContent = err.message;
-            btn.disabled = false;
-            btn.innerHTML = 'Decrypt & View';
-        }
-    });
-
-    function copyText() {
-        const text = document.getElementById('rawText').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Copied!');
-        });
-    }
-
-    function toggleMarkdown() {
-        const rawView = document.getElementById('rawText');
-        const mdView = document.getElementById('markdownPreview');
-
-        if (mdView.classList.contains('hidden')) {
-            const text = rawView.innerText;
-            mdView.innerHTML = marked.parse(text);
-            rawView.classList.add('hidden');
-            mdView.classList.remove('hidden');
-        } else {
-            mdView.classList.add('hidden');
-            rawView.classList.remove('hidden');
-        }
-    }
-</script>
+<script src="./js/text.js"></script>

@@ -129,6 +129,13 @@ class FileController
             $inputJSON = file_get_contents('php://input');
             $input = json_decode($inputJSON, true);
 
+            // Chunked Upload Handling
+            if (isset($input['action'])) {
+                $this->handleChunkedUpload($input);
+                return;
+            }
+
+            // Legacy Single-Shot Upload
             if (!isset($input['filename']) || !isset($input['content'])) {
                 throw new Exception("Missing filename or content.");
             }
@@ -141,7 +148,7 @@ class FileController
             $content = $decoded['data'];
 
             if (strlen($content) > Config::$MAX_FILE_SIZE) {
-                throw new Exception("File too large. Max limit is 10MB.");
+                throw new Exception("File too large. Max limit is " . (Config::$MAX_FILE_SIZE / 1024 / 1024) . "MB.");
             }
 
             // 2. Encrypt
@@ -165,6 +172,87 @@ class FileController
 
         } catch (Exception $e) {
             ApiResponse::error($e->getMessage());
+        }
+    }
+
+    private function handleChunkedUpload(array $input): void
+    {
+        $action = $input['action'];
+        $tempDir = Config::$UPLOAD_DIR . 'temp/';
+
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        switch ($action) {
+            case 'init':
+                $uploadId = uniqid('upload_', true);
+                // Create empty file
+                if (file_put_contents($tempDir . $uploadId, '') === false) {
+                    throw new Exception("Failed to initialize upload.");
+                }
+                ApiResponse::success(['upload_id' => $uploadId]);
+                break;
+
+            case 'chunk':
+                $uploadId = $input['upload_id'] ?? '';
+                $chunkData = $input['chunk_data'] ?? ''; // Base64
+
+                if (!$uploadId || !file_exists($tempDir . $uploadId)) {
+                    throw new Exception("Invalid upload ID.");
+                }
+
+                $decoded = Base64Helper::decode($chunkData);
+                $data = $decoded['data'];
+
+                // Append to temp file
+                if (file_put_contents($tempDir . $uploadId, $data, FILE_APPEND) === false) {
+                    throw new Exception("Failed to write chunk.");
+                }
+                ApiResponse::success(['status' => 'chunk_received']);
+                break;
+
+            case 'complete':
+                $uploadId = $input['upload_id'] ?? '';
+                $filename = $input['filename'] ?? 'unknown_file';
+
+                if (!$uploadId || !file_exists($tempDir . $uploadId)) {
+                    throw new Exception("Invalid upload ID.");
+                }
+
+                $tempFile = $tempDir . $uploadId;
+                $content = file_get_contents($tempFile);
+
+                if (strlen($content) > Config::$MAX_FILE_SIZE) {
+                    unlink($tempFile);
+                    throw new Exception("File too large. Max limit is " . (Config::$MAX_FILE_SIZE / 1024 / 1024) . "MB.");
+                }
+
+                // Encrypt
+                $encryptedData = $this->encryptionService->encrypt($content);
+
+                // Generate PIN
+                $pin = $this->pinService->generateUniquePin();
+
+                // Save
+                $this->fileRecord->save(
+                    $pin,
+                    $filename,
+                    $encryptedData['data'],
+                    $encryptedData['iv']
+                );
+
+                // Cleanup
+                unlink($tempFile);
+
+                ApiResponse::success([
+                    'pin' => $pin,
+                    'filename' => $filename
+                ], 'File uploaded successfully');
+                break;
+
+            default:
+                throw new Exception("Invalid action.");
         }
     }
 
