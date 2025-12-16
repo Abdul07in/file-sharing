@@ -5,7 +5,6 @@ namespace App\Config;
 class Config
 {
     // Database Credentials
-    // Database Credentials
     public static string $DB_HOST = 'localhost';
     public static string $DB_NAME = '1383838';
     public static string $DB_USER = '1383838';
