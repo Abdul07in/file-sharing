@@ -10,7 +10,7 @@ if (!file_exists($file)) {
 
 $content = file_get_contents($file);
 $size = strlen($content);
-$chunkSize = 512 * 1024;
+$chunkSize = 256 * 1024;
 $totalChunks = ceil($size / $chunkSize);
 
 echo "Uploading $size bytes in $totalChunks chunks...\n";
@@ -27,7 +27,7 @@ curl_close($ch);
 echo "Init Response: $resp\n";
 $json = json_decode($resp, true);
 if (($json['status'] ?? '') !== 'success')
-    die("Init failed\n");
+    die("Init failed: " . ($json['message'] ?? $resp) . "\n");
 $uploadId = $json['data']['upload_id'];
 echo "Upload ID: $uploadId\n";
 

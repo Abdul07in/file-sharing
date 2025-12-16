@@ -72,6 +72,7 @@ class FileRecord implements PinRepositoryInterface
         return $content;
     }
 
+
     public function delete(string $idOrPin): bool
     {
         if ($this->useJson) {
@@ -80,5 +81,30 @@ class FileRecord implements PinRepositoryInterface
 
         $stmt = $this->pdo->prepare("DELETE FROM uploads WHERE id = :id OR file_pin = :pin");
         return $stmt->execute([':id' => $idOrPin, ':pin' => $idOrPin]);
+    }
+
+    public function saveChunk(string $uploadId, int $chunkIndex, string $data): bool
+    {
+        if ($this->useJson)
+            return false;
+        $stmt = $this->pdo->prepare("INSERT INTO file_chunks (upload_id, chunk_index, chunk_data) VALUES (:uid, :idx, :data)");
+        return $stmt->execute([':uid' => $uploadId, ':idx' => $chunkIndex, ':data' => $data]);
+    }
+
+    public function getChunks(string $uploadId): array
+    {
+        if ($this->useJson)
+            return [];
+        $stmt = $this->pdo->prepare("SELECT chunk_data FROM file_chunks WHERE upload_id = :uid ORDER BY chunk_index ASC");
+        $stmt->execute([':uid' => $uploadId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function deleteChunks(string $uploadId): bool
+    {
+        if ($this->useJson)
+            return false;
+        $stmt = $this->pdo->prepare("DELETE FROM file_chunks WHERE upload_id = :uid");
+        return $stmt->execute([':uid' => $uploadId]);
     }
 }

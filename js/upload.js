@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             async function uploadFileChunked(file) {
-                const CHUNK_SIZE = 512 * 1024; // 512KB
+                const CHUNK_SIZE = 256 * 1024; // 256KB
                 const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
                 // 1. Init

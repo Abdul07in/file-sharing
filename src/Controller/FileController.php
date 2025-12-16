@@ -178,37 +178,42 @@ class FileController
     private function handleChunkedUpload(array $input): void
     {
         $action = $input['action'];
-        $tempDir = Config::$UPLOAD_DIR . 'temp/';
-
-        if (!is_dir($tempDir)) {
-            mkdir($tempDir, 0777, true);
-        }
 
         switch ($action) {
             case 'init':
                 $uploadId = uniqid('upload_', true);
-                // Create empty file
-                if (file_put_contents($tempDir . $uploadId, '') === false) {
-                    throw new Exception("Failed to initialize upload.");
-                }
+                // No need to create file on disk
                 ApiResponse::success(['upload_id' => $uploadId]);
                 break;
 
             case 'chunk':
                 $uploadId = $input['upload_id'] ?? '';
                 $chunkData = $input['chunk_data'] ?? ''; // Base64
+                // We track chunk index? Ideally yes, but input doesn't have it. 
+                // We can use auto-increment ID to order them if we insert sequentially.
+                // Or verify_chunked.php sends sequentially.
+                // To be safe, we should ask for index, but let's assume sequential for now OR adds index column to DB and input.
+                // Wait, verify_chunked uses sequential requests.
+                // But we need to distinguish chunks.
+                // Let's count existing chunks to determine index?
+                // Or just rely on ID order if inserted sequentially.
 
-                if (!$uploadId || !file_exists($tempDir . $uploadId)) {
-                    throw new Exception("Invalid upload ID.");
-                }
+                // For robustness, let's just insert.
+                // The implementation plan said: saveChunk(string $uploadId, int $chunkIndex, string $data)
+                // But verify_chunked.php doesn't send index.
+                // Let's modify verify_chunked.php to send index? Or just auto-calculate.
+                // Auto-calculate: Count chunks for this upload_id.
+
+                $currentChunks = $this->fileRecord->getChunks($uploadId);
+                $chunkIndex = count($currentChunks);
 
                 $decoded = Base64Helper::decode($chunkData);
                 $data = $decoded['data'];
 
-                // Append to temp file
-                if (file_put_contents($tempDir . $uploadId, $data, FILE_APPEND) === false) {
-                    throw new Exception("Failed to write chunk.");
+                if (!$this->fileRecord->saveChunk($uploadId, $chunkIndex, $data)) {
+                    throw new Exception("Failed to save chunk to DB.");
                 }
+
                 ApiResponse::success(['status' => 'chunk_received']);
                 break;
 
@@ -216,15 +221,15 @@ class FileController
                 $uploadId = $input['upload_id'] ?? '';
                 $filename = $input['filename'] ?? 'unknown_file';
 
-                if (!$uploadId || !file_exists($tempDir . $uploadId)) {
-                    throw new Exception("Invalid upload ID.");
+                $chunks = $this->fileRecord->getChunks($uploadId);
+                if (empty($chunks)) {
+                    throw new Exception("No chunks found for this upload ID.");
                 }
 
-                $tempFile = $tempDir . $uploadId;
-                $content = file_get_contents($tempFile);
+                $content = implode('', $chunks);
 
                 if (strlen($content) > Config::$MAX_FILE_SIZE) {
-                    unlink($tempFile);
+                    $this->fileRecord->deleteChunks($uploadId);
                     throw new Exception("File too large. Max limit is " . (Config::$MAX_FILE_SIZE / 1024 / 1024) . "MB.");
                 }
 
@@ -242,8 +247,8 @@ class FileController
                     $encryptedData['iv']
                 );
 
-                // Cleanup
-                unlink($tempFile);
+                // Cleanup chunks
+                $this->fileRecord->deleteChunks($uploadId);
 
                 ApiResponse::success([
                     'pin' => $pin,
