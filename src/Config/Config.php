@@ -5,11 +5,10 @@ namespace App\Config;
 class Config
 {
     // Database Credentials
-    // Database Credentials
     public static string $DB_HOST = 'localhost';
     public static string $DB_NAME = '1383838';
-    public static string $DB_USER = '1383838';
-    public static string $DB_PASS = 'abdulhoon123';
+    public static string $DB_USER = 'root';
+    public static string $DB_PASS = 'root';
     public static string $DB_CHARSET = 'utf8mb4';
 
     // Encryption Settings

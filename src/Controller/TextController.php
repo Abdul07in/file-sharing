@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Service\EncryptionService;
 use App\Service\PinService;
 use App\Model\TextRecord;
+use App\Helper\ApiResponse;
+use App\Helper\Base64Helper;
 use Exception;
 
 class TextController
@@ -107,6 +109,93 @@ class TextController
             $error = $e->getMessage();
             $view = 'view_text';
             require __DIR__ . '/../../views/layout.php';
+        }
+    }
+
+    public function handleApiUpload()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            ApiResponse::error('Method not allowed', 405);
+        }
+
+        try {
+            $inputJSON = file_get_contents('php://input');
+            $input = json_decode($inputJSON, true);
+            $contentBase64 = $input['content'] ?? '';
+
+            if (empty($contentBase64)) {
+                throw new Exception("Content is required.");
+            }
+
+            // Decode to get raw text
+            $decoded = Base64Helper::decode($contentBase64);
+            $content = $decoded['data'];
+
+            if (empty(trim($content))) {
+                throw new Exception("Text content cannot be empty.");
+            }
+
+            // 1. Encrypt
+            $encryptedData = $this->encryptionService->encrypt($content);
+
+            // 2. Generate PIN
+            $pin = $this->pinService->generateUniquePin();
+
+            // 3. Save to DB
+            $this->textRecord->save(
+                $pin,
+                $encryptedData['data'],
+                $encryptedData['iv']
+            );
+
+            ApiResponse::success([
+                'pin' => $pin
+            ], 'Text shared successfully');
+
+        } catch (Exception $e) {
+            ApiResponse::error($e->getMessage());
+        }
+    }
+
+    public function handleApiView()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            ApiResponse::error('Method not allowed', 405);
+        }
+
+        try {
+            $inputJSON = file_get_contents('php://input');
+            $input = json_decode($inputJSON, true);
+            $pin = $input['pin'] ?? '';
+
+            if (empty($pin)) {
+                throw new Exception("PIN is required.");
+            }
+
+            // 1. Find Record
+            $record = $this->textRecord->findByPin($pin);
+            if (!$record) {
+                throw new Exception("Invalid PIN or text expired.");
+            }
+
+            // 2. Retrieve Encrypted Content
+            $encryptedContent = $this->textRecord->getContent($pin);
+
+            // 3. Decrypt
+            $decryptedContent = $this->encryptionService->decrypt($encryptedContent, $record['iv']);
+
+            // 4. Burn on Read
+            $this->textRecord->delete($pin);
+
+            // 5. Encode response
+            $base64Response = Base64Helper::encode($decryptedContent, 'text/plain');
+
+            ApiResponse::success([
+                'content' => $base64Response
+            ], 'Text retrieved successfully');
+
+        } catch (Exception $e) {
+            ApiResponse::error($e->getMessage());
         }
     }
 }

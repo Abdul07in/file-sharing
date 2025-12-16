@@ -55,6 +55,15 @@ if ($uri === '/' || $uri === '/index.php') {
     }
 } elseif ($uri === '/view-text') {
     $textController->handleView();
+    // API Routes
+} elseif ($uri === '/api/upload') {
+    $fileController->handleApiUpload();
+} elseif ($uri === '/api/receive') {
+    $fileController->handleApiDownload();
+} elseif ($uri === '/api/share-text') {
+    $textController->handleApiUpload();
+} elseif ($uri === '/api/view-text') {
+    $textController->handleApiView();
 } else {
     // Debug info
     header("HTTP/1.0 404 Not Found");

@@ -7,6 +7,8 @@ use App\Service\StorageService;
 use App\Service\PinService;
 use App\Model\FileRecord;
 use App\Config\Config;
+use App\Helper\ApiResponse;
+use App\Helper\Base64Helper;
 use Exception;
 
 class FileController
@@ -114,6 +116,102 @@ class FileController
         } catch (Exception $e) {
             header('Location: ./receive?status=error&message=' . urlencode($e->getMessage()));
             exit;
+        }
+    }
+
+    public function handleApiUpload()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            ApiResponse::error('Method not allowed', 405);
+        }
+
+        try {
+            $inputJSON = file_get_contents('php://input');
+            $input = json_decode($inputJSON, true);
+
+            if (!isset($input['filename']) || !isset($input['content'])) {
+                throw new Exception("Missing filename or content.");
+            }
+
+            $filename = $input['filename'];
+            $base64Content = $input['content'];
+
+            // 1. Decode Base64
+            $decoded = Base64Helper::decode($base64Content);
+            $content = $decoded['data'];
+
+            if (strlen($content) > Config::$MAX_FILE_SIZE) {
+                throw new Exception("File too large. Max limit is 10MB.");
+            }
+
+            // 2. Encrypt
+            $encryptedData = $this->encryptionService->encrypt($content);
+
+            // 3. Generate PIN
+            $pin = $this->pinService->generateUniquePin();
+
+            // 4. Save to DB
+            $this->fileRecord->save(
+                $pin,
+                $filename,
+                $encryptedData['data'],
+                $encryptedData['iv']
+            );
+
+            ApiResponse::success([
+                'pin' => $pin,
+                'filename' => $filename
+            ], 'File uploaded successfully');
+
+        } catch (Exception $e) {
+            ApiResponse::error($e->getMessage());
+        }
+    }
+
+    public function handleApiDownload()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            ApiResponse::error('Method not allowed', 405);
+        }
+
+        try {
+            $inputJSON = file_get_contents('php://input');
+            $input = json_decode($inputJSON, true);
+            $pin = $input['pin'] ?? '';
+
+            if (empty($pin)) {
+                throw new Exception("PIN is required.");
+            }
+
+            // 1. Find Record
+            $record = $this->fileRecord->findByPin($pin);
+            if (!$record) {
+                throw new Exception("Invalid PIN or file expired.");
+            }
+
+            // 2. Retrieve Encrypted Content
+            $encryptedContent = $this->fileRecord->getContent($pin);
+            if (!$encryptedContent) {
+                throw new Exception("File content missing.");
+            }
+
+            // 3. Decrypt
+            $decryptedContent = $this->encryptionService->decrypt($encryptedContent, $record['encryption_iv']);
+
+            // 4. Encode as Base64 for transport
+            $base64Response = Base64Helper::encode($decryptedContent);
+
+            // 5. Cleanup (Burn on Read)
+            $this->fileRecord->delete($pin);
+
+            ApiResponse::success([
+                'filename' => $record['file_name'],
+                'content' => $base64Response,
+                'mime_type' => 'application/octet-stream'
+            ], 'File retrieved successfully');
+
+        } catch (Exception $e) {
+            ApiResponse::error($e->getMessage());
         }
     }
 }
