@@ -67,6 +67,7 @@ try {
         room_key VARCHAR(10) NOT NULL UNIQUE,
         owner_id INT NOT NULL,
         name VARCHAR(100) NOT NULL,
+        is_public BOOLEAN DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
     );

@@ -38,7 +38,17 @@ async function init() {
         const docData = await docRes.json();
         const initialContent = docData.content || '';
 
-        setupCollaboration(data.room.room_key, data.me, initialContent);
+        // Prepare User Object for WebRTC
+        // API returns { id, username, role, is_guest? }
+        // SimpleWebRTC expects { name, color, id }
+        const rtcUser = {
+            id: data.me.id,
+            name: data.me.username, // Map username to name
+            color: userColor,       // Use the locally generated color
+            isGuest: !!data.me.is_guest
+        };
+
+        setupCollaboration(data.room.room_key, rtcUser, initialContent);
 
     } catch (e) {
         console.error(e);
@@ -59,6 +69,138 @@ function setupCollaboration(roomName, user, initialContent) {
 
     // Use our Custom Manual WebRTC Provider
     const rtc = new SimpleWebRTC(roomName, ydoc, user);
+
+    // --- Video Call Logic ---
+    const videoContainer = document.getElementById('video-container'); // The sidebar
+    const localVideoWrapper = document.getElementById('local-video-wrapper');
+    const localVideo = document.getElementById('local-video');
+    const joinCallBtn = document.getElementById('join-call-btn');
+    const endCallBtn = document.getElementById('end-call-btn');
+    const toggleVideoBtn = document.getElementById('toggle-video-btn');
+    const toggleAudioBtn = document.getElementById('toggle-audio-btn');
+    const videoStreams = document.getElementById('video-streams');
+
+    let videoEnabled = true;
+    let audioEnabled = true;
+
+    // Helper to check sidebar visibility
+    function updateSidebarVisibility() {
+        const hasLocal = localVideo.srcObject && localVideo.srcObject.active;
+        const hasRemote = videoStreams.children.length > 0;
+
+        if (hasLocal || hasRemote) {
+            videoContainer.classList.remove('hidden');
+            videoContainer.classList.add('flex'); // Ensure flex is on when active
+        } else {
+            videoContainer.classList.add('hidden');
+            videoContainer.classList.remove('flex');
+        }
+    }
+
+    joinCallBtn.addEventListener('click', async () => {
+        try {
+            const stream = await rtc.enableVideo();
+            localVideo.srcObject = stream;
+            localVideoWrapper.classList.remove('hidden');
+
+            joinCallBtn.classList.add('hidden');
+            endCallBtn.classList.remove('hidden');
+
+            updateSidebarVisibility();
+        } catch (e) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Access Denied',
+                text: 'Could not access camera/microphone. Please check permissions.'
+            });
+            console.error(e);
+        }
+    });
+
+    endCallBtn.addEventListener('click', () => {
+        rtc.disableVideo();
+        localVideo.srcObject = null;
+        localVideoWrapper.classList.add('hidden');
+
+        endCallBtn.classList.add('hidden');
+        joinCallBtn.classList.remove('hidden');
+
+        // Reset toggles
+        videoEnabled = true;
+        audioEnabled = true;
+
+        updateSidebarVisibility();
+    });
+
+    toggleVideoBtn.addEventListener('click', () => {
+        videoEnabled = !videoEnabled;
+        rtc.toggleVideo(videoEnabled);
+        toggleVideoBtn.innerHTML = videoEnabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
+        toggleVideoBtn.className = `p-1 rounded text-white text-xs ${videoEnabled ? 'bg-gray-700/80 hover:bg-gray-600' : 'bg-red-600/80 hover:bg-red-500'}`;
+    });
+
+    toggleAudioBtn.addEventListener('click', () => {
+        audioEnabled = !audioEnabled;
+        rtc.toggleAudio(audioEnabled);
+        toggleAudioBtn.innerHTML = audioEnabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+        toggleAudioBtn.className = `p-1 rounded text-white text-xs ${audioEnabled ? 'bg-gray-700/80 hover:bg-gray-600' : 'bg-red-600/80 hover:bg-red-500'}`;
+    });
+
+    rtc.onStreamAdded = (peerId, stream) => {
+        console.log('[Room] Stream added for', peerId);
+        // Check if video element already exists
+        let vidContainer = document.getElementById(`container-${peerId}`);
+        if (!vidContainer) {
+            vidContainer = document.createElement('div');
+            vidContainer.className = 'relative w-full aspect-video bg-black rounded-lg overflow-hidden shadow-sm';
+            vidContainer.id = `container-${peerId}`;
+
+            const vid = document.createElement('video');
+            vid.id = `video-${peerId}`;
+            vid.className = 'w-full h-full object-cover';
+            vid.autoplay = true;
+            vid.playsInline = true;
+
+            const label = document.createElement('div');
+            label.className = 'absolute bottom-1 left-1 text-[10px] text-white bg-black/50 px-1 rounded';
+            // Try to find user name from awareness
+            const peerState = Array.from(rtc.awareness.getStates().values()).find(s => s.user.id === peerId) || {};
+            // If peerId is random (SimpleWebRTC default), we might not match user.id. 
+            // Fallback to generic if not found or improve mapping later.
+            label.innerText = peerState.user ? peerState.user.name : 'Remote User';
+
+            vidContainer.appendChild(vid);
+            vidContainer.appendChild(label);
+            videoStreams.appendChild(vidContainer);
+
+            // Handle stream ending (removal)
+            stream.onremovetrack = () => {
+                console.log('[Room] Stream track removed for', peerId);
+                // If no tracks left, remove container?
+                if (stream.getTracks().length === 0) {
+                    vidContainer.remove();
+                    updateSidebarVisibility();
+                }
+            };
+
+            // Also listen to specific track ended event (standard for stop())
+            stream.getTracks().forEach(track => {
+                track.onended = () => {
+                    console.log('[Room] Track ended for', peerId);
+                    if (stream.getTracks().every(t => t.readyState === 'ended')) {
+                        vidContainer.remove();
+                        updateSidebarVisibility();
+                    }
+                };
+            });
+        } else {
+            const vid = vidContainer.querySelector('video');
+            vid.srcObject = stream;
+        }
+
+        updateSidebarVisibility();
+    };
+
 
     const undoManager = new Y.UndoManager(ytext);
 
@@ -130,7 +272,13 @@ function renderUserList(states) {
 document.getElementById('copy-link-btn').addEventListener('click', () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-        alert('Link copied to clipboard!');
+        Swal.fire({
+            icon: 'success',
+            title: 'Link copied!',
+            text: 'Room link copied to clipboard.',
+            timer: 2000,
+            showConfirmButton: false
+        });
     });
 });
 

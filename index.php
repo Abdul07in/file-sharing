@@ -75,6 +75,8 @@ if ($uri === '/' || $uri === '/index.php') {
     $roomController->dashboard();
 } elseif ($uri === '/create-room') {
     $roomController->createRoom();
+} elseif ($uri === '/delete-room') {
+    $roomController->deleteRoom();
 } elseif ($uri === '/join-room') {
     $roomController->joinRoom();
 } elseif ($uri === '/room') {

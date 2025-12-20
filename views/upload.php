@@ -1,74 +1,155 @@
-<div
-    class="bg-white dark:bg-black shadow sm:rounded-lg overflow-hidden max-w-xl mx-auto border border-gray-100 dark:border-gray-800 transition-colors duration-200">
-    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-            Send a File
-        </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-            Files are encrypted and stored securely.
-        </p>
-    </div>
-    <div class="px-4 py-5 sm:p-6" id="uploadContainer">
-        <form id="uploadForm" class="space-y-6">
-            <div
-                class="max-w-lg flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-md hover:border-primary-500 dark:hover:border-primary-500 transition-colors group">
-                <div class="space-y-1 text-center">
-                    <i
-                        class="fas fa-cloud-upload-alt mx-auto text-5xl text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-colors mb-4"></i>
-                    <div class="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
-                        <label for="file"
-                            class="relative cursor-pointer bg-white dark:bg-black rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500 dark:focus-within:ring-offset-gray-900">
-                            <span id="filename-display">Upload a file</span>
-                            <input id="file" name="file" type="file" class="sr-only" required>
-                        </label>
-                        <p class="pl-1">or drag and drop</p>
-                    </div>
-                    <p class="text-xs text-gray-500">
-                        Max 10MB
-                    </p>
+<div class="w-full max-w-2xl mx-auto animate-slide-up">
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <!-- Header -->
+        <div
+            class="px-6 py-5 bg-gradient-to-r from-primary-500/10 to-purple-500/10 dark:from-primary-900/30 dark:to-purple-900/30 border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-cloud-upload-alt text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Send a File</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Files are encrypted and stored securely</p>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-6">
-                <button type="submit" id="uploadBtn"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
-                    Encrypt & Send
-                </button>
-            </div>
-        </form>
-
-        <!-- Progress / Status Area -->
-        <div id="statusArea" class="mt-4 hidden">
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
-                <div class="flex flex-col">
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm font-medium text-blue-700" id="statusMessage">Preparing...</span>
-                        <span class="text-sm font-medium text-blue-700" id="progressPercent">0%</span>
+        <!-- Content -->
+        <div class="p-6" id="uploadContainer">
+            <form id="uploadForm" class="space-y-6">
+                <!-- Drop Zone -->
+                <div class="drop-zone-modern cursor-pointer" id="dropZone">
+                    <div class="space-y-4">
+                        <div
+                            class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-100 to-purple-100 dark:from-primary-900/50 dark:to-purple-900/50 flex items-center justify-center mx-auto transition-transform hover:scale-110">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-primary-500 dark:text-primary-400"></i>
+                        </div>
+                        <div class="text-center">
+                            <label for="file" class="cursor-pointer">
+                                <span
+                                    class="text-lg font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                                    id="filename-display">
+                                    Click to upload
+                                </span>
+                                <span class="text-gray-500 dark:text-gray-400"> or drag and drop</span>
+                                <input id="file" name="file" type="file" class="sr-only" required>
+                            </label>
+                            <p class="text-sm text-gray-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>Maximum file size: 10MB
+                            </p>
+                        </div>
                     </div>
-                    <div class="w-full bg-blue-200 rounded-full h-2.5 dark:bg-blue-900/50">
-                        <div id="progressBar"
-                            class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                </div>
+
+                <!-- Upload Button -->
+                <button type="submit" id="uploadBtn" class="btn-modern w-full flex items-center justify-center gap-3">
+                    <i class="fas fa-lock"></i>
+                    <span>Encrypt & Send</span>
+                </button>
+            </form>
+
+            <!-- Progress / Status Area -->
+            <div id="statusArea" class="mt-6 hidden">
+                <div
+                    class="glass-card rounded-xl p-5 bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="spinner"></div>
+                            <span class="text-sm font-medium text-blue-700 dark:text-blue-300"
+                                id="statusMessage">Preparing...</span>
+                        </div>
+                        <span class="text-sm font-bold text-blue-700 dark:text-blue-300" id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-blue-100 dark:bg-blue-900/50 rounded-full h-3 overflow-hidden">
+                        <div id="progressBar" class="progress-gradient h-3 transition-all duration-300 ease-out"
                             style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Success Result -->
-        <div id="successResult"
-            class="hidden mt-6 bg-green-50 dark:bg-green-900/20 border-1 border-green-200 dark:border-green-800 p-4 rounded-md">
-            <h4 class="text-lg font-bold text-green-800 dark:text-green-400 mb-2">Upload Successful!</h4>
-            <p class="text-sm text-green-700 dark:text-green-300">Your File PIN:</p>
-            <div class="mt-2 flex items-center">
-                <span id="pinDisplay"
-                    class="text-2xl font-mono font-bold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 px-4 py-2 rounded border border-gray-300 dark:border-gray-600 select-all"></span>
+            <!-- Success Result -->
+            <div id="successResult" class="hidden mt-6 success-animate">
+                <div
+                    class="glass-card rounded-xl p-6 bg-green-50/80 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div
+                            class="w-14 h-14 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                            <i class="fas fa-check text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-green-800 dark:text-green-300">Upload Successful!</h4>
+                            <p class="text-sm text-green-600 dark:text-green-400">Share this PIN with the recipient</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center my-6">
+                        <span id="pinDisplay"
+                            class="text-4xl font-mono font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 px-8 py-4 rounded-2xl border-2 border-green-300 dark:border-green-700 shadow-lg select-all tracking-widest"></span>
+                    </div>
+                    <button onclick="location.reload()" class="btn-modern w-full"
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Another File
+                    </button>
+                </div>
             </div>
-            <p class="mt-4 text-xs text-green-600">Share this PIN with the recipient.</p>
-            <button onclick="location.reload()"
-                class="mt-4 text-sm text-primary-600 hover:text-primary-800 underline">Send another file</button>
         </div>
-
     </div>
 </div>
 
 <script src="./js/upload.js"></script>
+
+<script>
+    // Enhanced drop zone interactivity
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('file');
+        const filenameDisplay = document.getElementById('filename-display');
+
+        if (dropZone && fileInput) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    updateFilename(files[0].name);
+                }
+            }, false);
+
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    updateFilename(e.target.files[0].name);
+                }
+            });
+
+            function updateFilename(name) {
+                filenameDisplay.innerHTML = `<i class="fas fa-file mr-2"></i>${name}`;
+                filenameDisplay.classList.add('text-green-600', 'dark:text-green-400');
+            }
+        }
+    });
+</script>

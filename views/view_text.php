@@ -1,88 +1,98 @@
-<div
-    class="bg-white dark:bg-black shadow sm:rounded-lg overflow-hidden max-w-2xl mx-auto border border-gray-100 dark:border-gray-800 transition-colors duration-200">
-    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-            Secure Text View
-        </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" id="headerText">
-            Enter the 4-digit PIN to view shared text.
-        </p>
-    </div>
-    <div class="px-4 py-5 sm:p-6">
-
-        <!-- Error Area -->
-        <div id="errorArea" class="hidden rounded-md bg-red-50 p-4 mb-4">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+<div class="w-full max-w-3xl mx-auto animate-slide-up">
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <!-- Header -->
+        <div
+            class="px-6 py-5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-cyan-900/30 dark:to-blue-900/30 border-b border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-eye text-white text-xl"></i>
                 </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-700" id="errorMessage"></p>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Secure Text View</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400" id="headerText">Enter the 4-digit PIN to view
+                        shared text</p>
                 </div>
             </div>
         </div>
 
-        <!-- Input Form -->
-        <form id="viewTextForm">
-            <div>
-                <label for="pin" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content PIN</label>
-                <div class="mt-1">
-                    <input type="text" name="pin" id="pin" maxlength="4" pattern="\d{4}"
-                        class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md text-center tracking-widest py-3"
-                        placeholder="0000" required autocomplete="off">
+        <!-- Content -->
+        <div class="p-6">
+            <!-- Error Area -->
+            <div id="errorArea" class="hidden mb-6 animate-scale-in">
+                <div class="glass-card bg-red-50/80 dark:bg-red-900/30 border-l-4 border-red-500 px-4 py-3 rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                        <p class="text-sm text-red-700 dark:text-red-300" id="errorMessage"></p>
+                    </div>
                 </div>
             </div>
-            <div class="mt-6">
-                <button type="submit" id="viewBtn"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
-                    Decrypt & View
+
+            <!-- Input Form -->
+            <form id="viewTextForm" class="space-y-6">
+                <div>
+                    <label for="pin" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                        <i class="fas fa-key mr-2 text-cyan-500"></i>Content PIN
+                    </label>
+                    <input type="text" name="pin" id="pin" maxlength="4" pattern="\d{4}" class="pin-input w-full"
+                        placeholder="0000" required autocomplete="off">
+                </div>
+
+                <button type="submit" id="viewBtn" class="btn-modern w-full flex items-center justify-center gap-2"
+                    style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);">
+                    <i class="fas fa-unlock"></i>
+                    <span>Decrypt & View</span>
                 </button>
-            </div>
-        </form>
+            </form>
 
-        <!-- Result Content (Hidden by default) -->
-        <div id="resultContent" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                <button type="button" onclick="copyText()"
-                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                    Copy Text
-                </button>
-                <button type="button" onclick="toggleMarkdown()"
-                    class="inline-flex items-center justify-center w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                    Preview Markdown
-                </button>
-            </div>
+            <!-- Result Content (Hidden by default) -->
+            <div id="resultContent" class="hidden space-y-4 success-animate">
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="copyText()"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-medium">
+                        <i class="fas fa-copy"></i>Copy Text
+                    </button>
+                    <button type="button" onclick="toggleMarkdown()"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-medium">
+                        <i class="fas fa-eye"></i>Preview Markdown
+                    </button>
+                </div>
 
-            <!-- Raw Text View -->
-            <div id="rawText"
-                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm bg-gray-50 dark:bg-gray-900 dark:text-gray-100 p-4 font-mono text-sm overflow-auto"
-                style="max-height: 500px; white-space: pre-wrap;"></div>
+                <!-- Raw Text View -->
+                <div id="rawText"
+                    class="glass-card rounded-xl p-5 font-mono text-sm overflow-auto bg-gray-50/80 dark:bg-gray-900/50"
+                    style="max-height: 400px; white-space: pre-wrap;"></div>
 
-            <!-- Markdown Preview (Hidden) -->
-            <div id="markdownPreview"
-                class="hidden mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm bg-white dark:bg-black p-6 prose prose-indigo dark:prose-invert max-w-none">
-            </div>
+                <!-- Markdown Preview (Hidden) -->
+                <div id="markdownPreview"
+                    class="hidden glass-card rounded-xl p-6 prose prose-indigo dark:prose-invert max-w-none bg-white dark:bg-gray-800">
+                </div>
 
-            <div class="rounded-md bg-yellow-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-fire text-yellow-400 text-xl"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Burn on Read</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <p>This content has been permanently deleted from the server. Do not refresh.</p>
+                <!-- Burn Warning -->
+                <div
+                    class="glass-card rounded-xl p-5 bg-orange-50/80 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-fire text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-orange-800 dark:text-orange-300">Burn on Read</h4>
+                            <p class="text-sm text-orange-700 dark:text-orange-400 mt-1">This content has been
+                                permanently deleted from the server. Do not refresh the page.</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mt-6">
-                <a href="./view-text" class="text-primary-600 hover:text-primary-500 font-medium">&larr; View
-                    another</a>
+                <div class="pt-4">
+                    <a href="./view-text"
+                        class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-all">
+                        <i class="fas fa-arrow-left"></i>View another
+                    </a>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
 
