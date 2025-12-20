@@ -15,6 +15,10 @@ require_once __DIR__ . '/src/bootstrap.php';
 use App\Controller\HomeController;
 use App\Controller\FileController;
 use App\Controller\TextController;
+use App\Controller\AuthController;
+use App\Controller\RoomController;
+use App\Controller\SignalingController;
+use App\Controller\DocumentController;
 
 // Smart Router handles Subdirectories
 $scriptName = $_SERVER['SCRIPT_NAME']; // e.g. /folder/index.php
@@ -34,7 +38,9 @@ if (empty($uri)) {
 
 $homeController = new HomeController();
 $fileController = new FileController();
-$textController = new TextController(); // Instantiate TextController
+$textController = new TextController();
+$authController = new AuthController();
+$roomController = new RoomController();
 
 if ($uri === '/' || $uri === '/index.php') {
     $homeController->index();
@@ -55,6 +61,27 @@ if ($uri === '/' || $uri === '/index.php') {
     }
 } elseif ($uri === '/view-text') {
     $textController->handleView();
+
+    // Auth Routes
+} elseif ($uri === '/login') {
+    $authController->login();
+} elseif ($uri === '/register') {
+    $authController->register();
+} elseif ($uri === '/logout') {
+    $authController->logout();
+
+    // Room Routes
+} elseif ($uri === '/dashboard') {
+    $roomController->dashboard();
+} elseif ($uri === '/create-room') {
+    $roomController->createRoom();
+} elseif ($uri === '/join-room') {
+    $roomController->joinRoom();
+} elseif ($uri === '/room') {
+    $roomController->room();
+} elseif ($uri === '/api/room/details') {
+    $roomController->apiRoomDetails();
+
     // API Routes
 } elseif ($uri === '/api/upload') {
     $fileController->handleApiUpload();
@@ -64,6 +91,12 @@ if ($uri === '/' || $uri === '/index.php') {
     $textController->handleApiUpload();
 } elseif ($uri === '/api/view-text') {
     $textController->handleApiView();
+} elseif ($uri === '/api/signaling') {
+    $signalingController = new SignalingController();
+    $signalingController->handleRequest();
+} elseif ($uri === '/api/document') {
+    $docController = new DocumentController();
+    $docController->handleRequest();
 } else {
     // Debug info
     header("HTTP/1.0 404 Not Found");

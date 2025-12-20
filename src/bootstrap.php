@@ -27,4 +27,10 @@ spl_autoload_register(function ($class) {
 
 // Load Environment and Config
 use App\Config\Config;
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 Config::load();
