@@ -44,12 +44,8 @@ class RoomController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'] ?? 'New Room';
-<<<<<<< HEAD
             $isPublic = isset($_POST['is_public']);
             $roomKey = $this->roomModel->create($_SESSION['user_id'], $name, $isPublic);
-=======
-            $roomKey = $this->roomModel->create($_SESSION['user_id'], $name);
->>>>>>> origin/main
 
             // Add creator as owner in participants table for easier querying, though optional given strict schema
             $id = $this->roomModel->findByKey($roomKey)['id'];
@@ -60,7 +56,6 @@ class RoomController
         }
     }
 
-<<<<<<< HEAD
     public function deleteRoom()
     {
         $this->requireAuth();
@@ -91,8 +86,6 @@ class RoomController
         }
     }
 
-=======
->>>>>>> origin/main
     public function joinRoom()
     {
         $this->requireAuth();
@@ -116,22 +109,14 @@ class RoomController
 
     public function room()
     {
-<<<<<<< HEAD
         $roomKey = $_GET['key'] ?? '';
         $room = $this->roomModel->findByKey($roomKey);
 
-=======
-        $this->requireAuth();
-        $roomKey = $_GET['key'] ?? '';
-
-        $room = $this->roomModel->findByKey($roomKey);
->>>>>>> origin/main
         if (!$room) {
             header('Location: ./dashboard?error=Room not found');
             exit;
         }
 
-<<<<<<< HEAD
         // Public Access Check
         if (!isset($_SESSION['user_id'])) {
             if ($room['is_public']) {
@@ -169,23 +154,6 @@ class RoomController
                 header('Location: ./dashboard?error=You are banned from this room');
                 exit;
             }
-=======
-        $userId = $_SESSION['user_id'];
-        $participant = $this->participantModel->getParticipant($room['id'], $userId);
-
-        // If not participant and not owner (fallback), deny or auto-join?
-        // Let's safe guard: strictly must be participant. 
-        // Owner added themselves in createRoom so this covers everyone.
-        if (!$participant) {
-            // Optional: Auto-join? No, explicit join prefers.
-            header('Location: ./dashboard?error=You must join the room first');
-            exit;
-        }
-
-        if ($participant['status'] === 'banned') {
-            header('Location: ./dashboard?error=You are banned from this room');
-            exit;
->>>>>>> origin/main
         }
 
         $view = 'room';
@@ -196,14 +164,6 @@ class RoomController
     public function apiRoomDetails()
     {
         header('Content-Type: application/json');
-<<<<<<< HEAD
-=======
-        if (!isset($_SESSION['user_id'])) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Unauthorized']);
-            exit;
-        }
->>>>>>> origin/main
 
         $roomKey = $_GET['key'] ?? '';
         $room = $this->roomModel->findByKey($roomKey);
@@ -214,7 +174,6 @@ class RoomController
             exit;
         }
 
-<<<<<<< HEAD
         // Auth Logic
         if (!isset($_SESSION['user_id'])) {
             if ($room['is_public']) {
@@ -256,10 +215,6 @@ class RoomController
                 ]);
                 exit;
             }
-=======
-        $participant = $this->participantModel->getParticipant($room['id'], $_SESSION['user_id']);
-        if (!$participant || $participant['status'] === 'banned') {
->>>>>>> origin/main
             http_response_code(403);
             echo json_encode(['error' => 'Access denied']);
             exit;
