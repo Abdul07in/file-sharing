@@ -136,6 +136,14 @@
                         </a>
                     <?php endif; ?>
 
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="./dashboard"
+                            class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                    <?php else: ?>
+                        <a href="./login"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Login</a>
+                    <?php endif; ?>
+
                     <!-- Theme Toggle Button -->
                     <button id="theme-toggle" type="button"
                         class="ml-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 p-2.5 rounded-xl transition-all duration-200 hover:scale-110">

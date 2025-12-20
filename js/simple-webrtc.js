@@ -19,10 +19,13 @@ export class SimpleWebRTC {
             }
         });
 
+<<<<<<< HEAD
         this.localStream = null;
         this.onStreamAdded = null;
         this.onStreamRemoved = null;
 
+=======
+>>>>>>> origin/main
 
 
         // Connect to Signaling Server
@@ -92,10 +95,15 @@ export class SimpleWebRTC {
                 // Check if we already have a connection
                 if (this.peers.has(peerId)) {
                     const existingPeer = this.peers.get(peerId);
+<<<<<<< HEAD
                     // Collision check: We have a connection and it's not stable OR we are currently making an offer
                     const offerCollision = existingPeer.pc.signalingState !== 'stable' || existingPeer.makingOffer;
 
                     if (offerCollision) {
+=======
+                    // Collision check: We have a connection and it's not stable (meaning we might be making an offer too)
+                    if (existingPeer.pc.signalingState !== 'stable') {
+>>>>>>> origin/main
                         console.warn(`[SimpleWebRTC] Glare detected with ${peerId}. Polite: ${isPolite}`);
                         if (!isPolite) {
                             console.log('[SimpleWebRTC] Impolite - Ignoring incoming offer');
@@ -166,6 +174,7 @@ export class SimpleWebRTC {
         }
     }
 
+<<<<<<< HEAD
     // --- Media ---
 
     async enableVideo() {
@@ -235,6 +244,8 @@ export class SimpleWebRTC {
         }
     }
 
+=======
+>>>>>>> origin/main
     // --- WebRTC ---
 
     createPeerConnection(targetPeerId, isInitiator) {
@@ -248,6 +259,7 @@ export class SimpleWebRTC {
             ]
         });
 
+<<<<<<< HEAD
         // Add local stream tracks if available
         if (this.localStream) {
             this.localStream.getTracks().forEach(track => {
@@ -293,6 +305,9 @@ export class SimpleWebRTC {
         };
 
         const peer = { pc, channel: null, candidateQueue: [], makingOffer: false };
+=======
+        const peer = { pc, channel: null, candidateQueue: [] };
+>>>>>>> origin/main
         this.peers.set(targetPeerId, peer);
 
         pc.onicecandidate = (event) => {
@@ -307,6 +322,7 @@ export class SimpleWebRTC {
             this.setupDataChannel(channel, targetPeerId);
             peer.channel = channel;
 
+<<<<<<< HEAD
             peer.makingOffer = true;
             pc.createOffer().then(offer => {
                 // If the PC was closed (e.g. by rollback) or state changed, don't proceed without caution
@@ -318,6 +334,11 @@ export class SimpleWebRTC {
                 console.error('[SimpleWebRTC] Error creating offer:', e);
             }).finally(() => {
                 peer.makingOffer = false;
+=======
+            pc.createOffer().then(offer => {
+                pc.setLocalDescription(offer);
+                this.broadcastSignal({ type: 'offer', target: targetPeerId, payload: offer });
+>>>>>>> origin/main
             });
         } else {
             // Wait for Data Channel

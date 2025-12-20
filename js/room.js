@@ -200,8 +200,6 @@ function setupCollaboration(roomName, user, initialContent) {
 
         updateSidebarVisibility();
     };
-
-
     const undoManager = new Y.UndoManager(ytext);
 
     // Note: SimpleWebRTC doesn't have built-in Awareness (Cursors) yet in this simple version.

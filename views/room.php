@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="h-[calc(100vh-10rem)] flex flex-col animate-fade-in">
     <!-- Room Header -->
     <div class="glass-card rounded-2xl p-4 mb-4">
@@ -32,11 +33,29 @@
                     <i class="fas fa-link"></i>
                     <span class="hidden sm:inline">Copy Invite Link</span>
                 </button>
+=======
+<div class="h-[calc(100vh-12rem)] flex flex-col">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white" id="room-name">Loading Room...</h1>
+            <p class="text-sm text-gray-500">Room Key: <span
+                    class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded select-all"
+                    id="room-key"><?= htmlspecialchars($_GET['key']) ?></span></p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span id="connection-status">Connecting...</span>
+            </span>
+            <div id="users-list" class="flex -space-x-2 overflow-hidden">
+                <!-- User avatars will go here -->
+>>>>>>> origin/main
             </div>
         </div>
     </div>
 
     <!-- Toolbar/Actions -->
+<<<<<<< HEAD
     <div class="toolbar-glass rounded-xl p-3 mb-2 flex justify-between items-center">
         <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
             <div class="flex items-center gap-2">
@@ -53,6 +72,23 @@
     // We can check role here via PHP if we want server-side button rendering, 
     // but JS will handle client-side logic too.
     ?>
+=======
+    <div
+        class="bg-gray-50 dark:bg-gray-800 p-2 rounded-t-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div class="text-sm text-gray-600 dark:text-gray-300">
+            <span id="active-users-count">0</span> active users
+        </div>
+
+        <?php
+        // We can check role here via PHP if we want server-side button rendering, 
+        // but JS will handle client-side logic too.
+        ?>
+        <button id="copy-link-btn"
+            class="text-xs bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1 rounded transition">
+            <i class="fas fa-link mr-1"></i> Copy Invite Link
+        </button>
+    </div>
+>>>>>>> origin/main
 
     <!-- Import Map to resolve One Version of Truth for dependencies -->
     <script type="importmap">
@@ -71,6 +107,7 @@
         }
     }
     </script>
+<<<<<<< HEAD
 
     <!-- Main Content Area -->
     <div
@@ -135,15 +172,29 @@
 
 <script type="module" src="./js/room.js"></script>
 
+=======
+    <!-- Editor Container -->
+    <div id="editor-container"
+        class="flex-grow border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden bg-white dark:bg-gray-900 text-base">
+        <!-- CodeMirror will be mounted here -->
+    </div>
+</div>
+
+<script type="module" src="./js/room.js"></script>
+>>>>>>> origin/main
 <style>
     /* Custom editor styles */
     .cm-editor {
         height: 100%;
+<<<<<<< HEAD
         font-size: 15px;
+=======
+>>>>>>> origin/main
     }
 
     .cm-scroller {
         overflow: auto;
+<<<<<<< HEAD
         padding: 16px;
     }
 
@@ -154,18 +205,30 @@
     .cm-gutters {
         background: transparent;
         border-right: 1px solid rgba(156, 163, 175, 0.2);
+=======
+>>>>>>> origin/main
     }
 
     /* User cursor styles */
     .yRemoteSelection {
+<<<<<<< HEAD
         background-color: rgba(99, 102, 241, 0.3);
+=======
+        background-color: rgba(250, 129, 0, .5);
+>>>>>>> origin/main
     }
 
     .yRemoteSelectionHead {
         position: absolute;
+<<<<<<< HEAD
         border-left: #6366f1 solid 2px;
         border-top: #6366f1 solid 2px;
         border-bottom: #6366f1 solid 2px;
+=======
+        border-left: orange solid 2px;
+        border-top: orange solid 2px;
+        border-bottom: orange solid 2px;
+>>>>>>> origin/main
         height: 100%;
         box-sizing: border-box;
     }
@@ -173,11 +236,16 @@
     .yRemoteSelectionHead::after {
         position: absolute;
         content: ' ';
+<<<<<<< HEAD
         border: 3px solid #6366f1;
+=======
+        border: 3px solid orange;
+>>>>>>> origin/main
         border-radius: 4px;
         left: -4px;
         top: -5px;
     }
+<<<<<<< HEAD
 
     /* Dark mode editor */
     .dark .cm-editor {
@@ -207,4 +275,6 @@
     .cm-scroller::-webkit-scrollbar-thumb:hover {
         background: rgba(156, 163, 175, 0.6);
     }
+=======
+>>>>>>> origin/main
 </style>
