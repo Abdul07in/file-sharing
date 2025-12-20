@@ -14,7 +14,6 @@ class Room
         $this->pdo = $pdo;
     }
 
-<<<<<<< HEAD
     public function create(int $ownerId, string $name, bool $isPublic = false): string
     {
         $roomKey = $this->generateRoomKey();
@@ -25,17 +24,6 @@ class Room
             'owner_id' => $ownerId,
             'name' => $name,
             'is_public' => $isPublic ? 1 : 0
-=======
-    public function create(int $ownerId, string $name): string
-    {
-        $roomKey = $this->generateRoomKey();
-
-        $stmt = $this->pdo->prepare("INSERT INTO rooms (room_key, owner_id, name) VALUES (:room_key, :owner_id, :name)");
-        $stmt->execute([
-            'room_key' => $roomKey,
-            'owner_id' => $ownerId,
-            'name' => $name
->>>>>>> origin/main
         ]);
 
         return $roomKey;
