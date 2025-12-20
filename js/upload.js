@@ -21,7 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const file = fileInput.files[0];
             if (!file) {
-                alert("Please select a file first.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No File Selected',
+                    text: 'Please select a file first.'
+                });
                 return;
             }
 
@@ -54,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             async function uploadFileChunked(file) {
-                const CHUNK_SIZE = 256 * 1024; // 256KB
+                const CHUNK_SIZE = 1024 * 1024; // 1MB
                 const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
                 // 1. Init

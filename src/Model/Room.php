@@ -14,15 +14,16 @@ class Room
         $this->pdo = $pdo;
     }
 
-    public function create(int $ownerId, string $name): string
+    public function create(int $ownerId, string $name, bool $isPublic = false): string
     {
         $roomKey = $this->generateRoomKey();
 
-        $stmt = $this->pdo->prepare("INSERT INTO rooms (room_key, owner_id, name) VALUES (:room_key, :owner_id, :name)");
+        $stmt = $this->pdo->prepare("INSERT INTO rooms (room_key, owner_id, name, is_public) VALUES (:room_key, :owner_id, :name, :is_public)");
         $stmt->execute([
             'room_key' => $roomKey,
             'owner_id' => $ownerId,
-            'name' => $name
+            'name' => $name,
+            'is_public' => $isPublic ? 1 : 0
         ]);
 
         return $roomKey;
