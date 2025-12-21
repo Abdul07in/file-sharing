@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     owner_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     is_public BOOLEAN DEFAULT 0,
+    content LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );

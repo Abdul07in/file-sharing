@@ -188,27 +188,56 @@ class FileController
 
             case 'chunk':
                 $uploadId = $input['upload_id'] ?? '';
-                $chunkData = $input['chunk_data'] ?? ''; // Base64
-                // We track chunk index? Ideally yes, but input doesn't have it. 
-                // We can use auto-increment ID to order them if we insert sequentially.
-                // Or verify_chunked.php sends sequentially.
-                // To be safe, we should ask for index, but let's assume sequential for now OR adds index column to DB and input.
-                // Wait, verify_chunked uses sequential requests.
-                // But we need to distinguish chunks.
-                // Let's count existing chunks to determine index?
-                // Or just rely on ID order if inserted sequentially.
+                $encryptedChunkData = $input['chunk_data'] ?? ''; // Encrypted Base64
+                $keyBase64 = $input['key'] ?? ''; // Session Key Base64
+                $ivBase64 = $input['iv'] ?? ''; // IV Base64
 
-                // For robustness, let's just insert.
-                // The implementation plan said: saveChunk(string $uploadId, int $chunkIndex, string $data)
-                // But verify_chunked.php doesn't send index.
-                // Let's modify verify_chunked.php to send index? Or just auto-calculate.
-                // Auto-calculate: Count chunks for this upload_id.
-
+                // Calculate chunk index
                 $currentChunks = $this->fileRecord->getChunks($uploadId);
                 $chunkIndex = count($currentChunks);
 
-                $decoded = Base64Helper::decode($chunkData);
-                $data = $decoded['data'];
+                // Decode inputs
+                try {
+                    $decodedChunk = Base64Helper::decode($encryptedChunkData);
+                    $ciphertext = $decodedChunk['data'];
+
+                    // If key/iv provided, assume encryption. If not, fallback or error?
+                    // User requested encryption, so we expect them.
+
+                    if (empty($keyBase64) || empty($ivBase64)) {
+                        // Fallback for non-encrypted (legacy)?
+                        // The user asked to CHANGE the behavior. 
+                        // But for safety, check if they exist.
+                        if (empty($keyBase64))
+                            throw new Exception("Encryption key missing in chunk upload.");
+                        if (empty($ivBase64))
+                            throw new Exception("Encryption IV missing in chunk upload.");
+                    }
+
+                    $decodedKey = Base64Helper::decode($keyBase64);
+                    $key = $decodedKey['data'];
+
+                    $decodedIv = Base64Helper::decode($ivBase64);
+                    $iv = $decodedIv['data'];
+
+                    // Decrypt
+                    $decrypted = openssl_decrypt(
+                        $ciphertext,
+                        'aes-256-cbc',
+                        $key,
+                        OPENSSL_RAW_DATA,
+                        $iv
+                    );
+
+                    if ($decrypted === false) {
+                        throw new Exception("Decryption of chunk failed.");
+                    }
+
+                    $data = $decrypted;
+
+                } catch (Exception $e) {
+                    throw new Exception("Chunk processing failed: " . $e->getMessage());
+                }
 
                 if (!$this->fileRecord->saveChunk($uploadId, $chunkIndex, $data)) {
                     throw new Exception("Failed to save chunk to DB.");

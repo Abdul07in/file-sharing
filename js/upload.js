@@ -66,35 +66,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (initResponse.status !== 'success') throw new Error(initResponse.message || 'Init failed');
                 const uploadId = initResponse.data.upload_id;
 
-                // 2. Chunk Loop
+                // 2. Generate Key (AES-256-CBC)
+                const key = await window.crypto.subtle.generateKey(
+                    { name: "AES-CBC", length: 256 },
+                    true,
+                    ["encrypt"]
+                );
+
+                // Export key to send (Raw -> Base64)
+                const rawKey = await window.crypto.subtle.exportKey("raw", key);
+                const keyBase64 = arrayBufferToBase64(rawKey);
+
+                // 3. Chunk Loop
                 for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
                     const start = chunkIndex * CHUNK_SIZE;
                     const end = Math.min(start + CHUNK_SIZE, file.size);
                     const blob = file.slice(start, end);
 
-                    // Update UI BEFORE uploading
+                    // Update UI
                     const percent = Math.round((chunkIndex / totalChunks) * 100);
-                    statusMsg.textContent = `Uploading...`;
+                    statusMsg.textContent = `Encrypting & Uploading...`;
                     if (progressPercent) progressPercent.textContent = `${percent}%`;
                     if (progressBar) progressBar.style.width = `${percent}%`;
 
-                    // Convert Blob to Base64
-                    const base64Data = await new Promise((resolve, reject) => {
+                    // Read as ArrayBuffer for encryption
+                    const arrayBuffer = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
-                        reader.onload = () => {
-                            const result = reader.result;
-                            const base64 = result.split(',')[1];
-                            resolve(base64);
-                        };
+                        reader.onload = () => resolve(reader.result);
                         reader.onerror = reject;
-                        reader.readAsDataURL(blob);
+                        reader.readAsArrayBuffer(blob);
                     });
+
+                    // Generate IV
+                    const iv = window.crypto.getRandomValues(new Uint8Array(16));
+
+                    // Encrypt
+                    const encryptedBuffer = await window.crypto.subtle.encrypt(
+                        { name: "AES-CBC", iv: iv },
+                        key,
+                        arrayBuffer
+                    );
 
                     // Send Chunk
                     const chunkResponse = await postData({
                         action: 'chunk',
                         upload_id: uploadId,
-                        chunk_data: base64Data
+                        chunk_data: arrayBufferToBase64(encryptedBuffer),
+                        key: keyBase64,
+                        iv: arrayBufferToBase64(iv)
                     });
 
                     if (chunkResponse.status !== 'success') throw new Error(chunkResponse.message || 'Chunk failed');
@@ -103,10 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 100%
                 if (progressBar) progressBar.style.width = '100%';
                 if (progressPercent) progressPercent.textContent = '100%';
-                statusMsg.textContent = "Finalizing encryption...";
+                statusMsg.textContent = "Finalizing...";
 
-                // 3. Complete
-                btn.innerHTML = `<i class="fas fa-circle-notch fa-spin -ml-1 mr-3 text-white inline"></i> Encrypting...`;
+                // 4. Complete
+                btn.innerHTML = `<i class="fas fa-circle-notch fa-spin -ml-1 mr-3 text-white inline"></i> Processing...`;
 
                 const completeResponse = await postData({
                     action: 'complete',
@@ -124,6 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     throw new Error(completeResponse.message || 'Completion failed');
                 }
+            }
+
+            // Helper for ArrayBuffer to Base64
+            function arrayBufferToBase64(buffer) {
+                let binary = '';
+                const bytes = new Uint8Array(buffer);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return window.btoa(binary);
             }
 
             async function postData(data) {

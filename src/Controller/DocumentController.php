@@ -18,15 +18,20 @@ class DocumentController
 
     public function handleRequest()
     {
-        $action = $_GET['action'] ?? '';
+        try {
+            $action = $_GET['action'] ?? '';
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'save') {
-            $this->save();
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'get') {
-            $this->get();
-        } else {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid action']);
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'save') {
+                $this->save();
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'get') {
+                $this->get();
+            } else {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid action']);
+            }
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
         }
     }
 
@@ -68,6 +73,13 @@ class DocumentController
         $stmt = $this->pdo->prepare("SELECT content FROM rooms WHERE room_key = :room_key");
         $stmt->execute(['room_key' => $roomKey]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row === false) {
+            // Room not found
+            http_response_code(404);
+            echo json_encode(['error' => 'Room not found']);
+            return;
+        }
 
         echo json_encode(['content' => $row['content'] ?? '']);
     }
