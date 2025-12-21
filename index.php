@@ -52,6 +52,9 @@ if ($uri === '/' || $uri === '/index.php') {
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileController->handleDownload();
     }
+} elseif ($uri === '/p2p') {
+    $view = 'p2p';
+    require __DIR__ . '/views/layout.php';
 } elseif ($uri === '/share-text') {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $view = 'share_text';
