@@ -81,7 +81,7 @@ export class MockWebSocket extends EventTarget {
 
         // Wait 1s before next poll to avoid hammering the server
         if (this.isPolling && this.readyState === 1) {
-            setTimeout(() => this.pollNext(), 1000);
+            setTimeout(() => this.pollNext(), 200);
         }
     }
 

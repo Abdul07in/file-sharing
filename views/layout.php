@@ -97,6 +97,10 @@
                         class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200">
                         <i class="fas fa-download mr-2"></i>Receive
                     </a>
+                    <a href="./p2p"
+                        class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200">
+                        <i class="fas fa-network-wired mr-2"></i>P2P Transfer
+                    </a>
                     <a href="./share-text"
                         class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200">
                         <i class="fas fa-comment-dots mr-2"></i>Share Text
@@ -183,6 +187,10 @@
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200">
                     <i class="fas fa-download w-5"></i>Receive
                 </a>
+                <a href="./p2p"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200">
+                    <i class="fas fa-network-wired w-5"></i>P2P Transfer
+                </a>
                 <a href="./share-text"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200">
                     <i class="fas fa-comment-dots w-5"></i>Share Text
@@ -202,7 +210,8 @@
                         </div>
                         <div>
                             <p class="font-semibold text-gray-900 dark:text-white">
-                                <?= htmlspecialchars($_SESSION['username']) ?></p>
+                                <?= htmlspecialchars($_SESSION['username']) ?>
+                            </p>
                             <p class="text-xs text-gray-500">Logged in</p>
                         </div>
                     </div>
@@ -240,7 +249,8 @@
                         <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
                     </div>
                     <p class="text-sm text-red-700 dark:text-red-300 font-medium">
-                        <?= htmlspecialchars($_GET['message'] ?? 'An error occurred') ?></p>
+                        <?= htmlspecialchars($_GET['message'] ?? 'An error occurred') ?>
+                    </p>
                 </div>
             </div>
         <?php endif; ?>
@@ -261,7 +271,8 @@
                         </p>
                         <?php if (isset($_GET['filename'])): ?>
                             <p class="text-sm text-green-600 dark:text-green-400 mt-1">File:
-                                <strong><?= htmlspecialchars($_GET['filename']) ?></strong></p>
+                                <strong><?= htmlspecialchars($_GET['filename']) ?></strong>
+                            </p>
                         <?php endif; ?>
                     </div>
                 </div>

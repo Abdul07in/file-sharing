@@ -1,0 +1,2 @@
+This is a test file for P2P transfer.
+Hello WebRTC!
