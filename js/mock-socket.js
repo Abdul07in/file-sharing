@@ -17,21 +17,27 @@ export class MockWebSocket extends EventTarget {
         }, 100);
     }
 
-    send(data) {
+    send(data, useKeepalive = false) {
         // Wrap the original signaling payload with our PeerID
         const payload = JSON.stringify({
             pid: this.peerId,
             msg: data
         });
 
-        fetch(`./api/signaling?action=publish`, {
+        const options = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 room_key: this.roomKey,
                 message: JSON.parse(payload) // Parse it so DB stores it as JSON object, not stringified string
             })
-        }).catch(err => console.error('[MockWebSocket] Send failed', err));
+        };
+
+        if (useKeepalive) {
+            options.keepalive = true;
+        }
+
+        fetch(`./api/signaling?action=publish`, options).catch(err => console.error('[MockWebSocket] Send failed', err));
     }
 
     startPolling() {
