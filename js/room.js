@@ -70,6 +70,11 @@ function setupCollaboration(roomName, user, initialContent) {
     // Use our Custom Manual WebRTC Provider
     const rtc = new SimpleWebRTC(roomName, ydoc, user);
 
+    // Handle user leaving
+    window.addEventListener('beforeunload', () => {
+        rtc.leave();
+    });
+
     // --- Video Call Logic ---
     const videoContainer = document.getElementById('video-container'); // The sidebar
     const localVideoWrapper = document.getElementById('local-video-wrapper');
@@ -103,6 +108,9 @@ function setupCollaboration(roomName, user, initialContent) {
             localVideo.srcObject = stream;
             localVideoWrapper.classList.remove('hidden');
 
+            // Update Awareness: User is in call
+            rtc.awareness.setLocalStateField('isInCall', true);
+
             joinCallBtn.classList.add('hidden');
             endCallBtn.classList.remove('hidden');
 
@@ -121,6 +129,9 @@ function setupCollaboration(roomName, user, initialContent) {
         rtc.disableVideo();
         localVideo.srcObject = null;
         localVideoWrapper.classList.add('hidden');
+
+        // Update Awareness: User left call
+        rtc.awareness.setLocalStateField('isInCall', false);
 
         endCallBtn.classList.add('hidden');
         joinCallBtn.classList.remove('hidden');
@@ -163,15 +174,19 @@ function setupCollaboration(roomName, user, initialContent) {
 
             const label = document.createElement('div');
             label.className = 'absolute bottom-1 left-1 text-[10px] text-white bg-black/50 px-1 rounded';
-            // Try to find user name from awareness
-            const peerState = Array.from(rtc.awareness.getStates().values()).find(s => s.user.id === peerId) || {};
-            // If peerId is random (SimpleWebRTC default), we might not match user.id. 
-            // Fallback to generic if not found or improve mapping later.
-            label.innerText = peerState.user ? peerState.user.name : 'Remote User';
+
+            // Match using webrtcId
+            const peerState = Array.from(rtc.awareness.getStates().values()).find(s => s.user && s.user.webrtcId === peerId) || {};
+            label.innerText = peerState.user ? peerState.user.name : 'Only User';
 
             vidContainer.appendChild(vid);
             vidContainer.appendChild(label);
             videoStreams.appendChild(vidContainer);
+
+            // Visibility Check based on isInCall
+            if (!peerState.isInCall) {
+                vidContainer.classList.add('hidden');
+            }
 
             // Handle stream ending (removal)
             stream.onremovetrack = () => {
@@ -234,6 +249,28 @@ function setupCollaboration(roomName, user, initialContent) {
 
         // Update user list UI if needed
         renderUserList(states);
+
+        // Update Video Visibilities based on state changes
+        states.forEach(state => {
+            if (state.user && state.user.webrtcId) {
+                const container = document.getElementById(`container-${state.user.webrtcId}`);
+                if (container) {
+                    if (state.isInCall) {
+                        container.classList.remove('hidden');
+                        updateSidebarVisibility();
+                    } else {
+                        container.classList.add('hidden');
+                        updateSidebarVisibility();
+                    }
+
+                    // Update label if needed (e.g. late discovery)
+                    const label = container.querySelector('div.text-\\[10px\\]');
+                    if (label && state.user.name) {
+                        label.innerText = state.user.name;
+                    }
+                }
+            }
+        });
     });
 
     // Persistence: Save to DB every 10 seconds
